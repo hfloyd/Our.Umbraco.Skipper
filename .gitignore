@@ -16,6 +16,7 @@ nupkg/
 *.user
 *.userosscache
 *.sln.docstates
+/src/Custom.targets
 
 # Build results
 [Dd]ebug/
@@ -34,3 +35,4 @@ msbuild.wrn
 
 # Visual Studio 2015
 .vs/
+

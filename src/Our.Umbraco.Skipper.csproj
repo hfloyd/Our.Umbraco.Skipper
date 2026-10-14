@@ -35,16 +35,20 @@
 		<Version>1.1.5</Version>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Umbraco.Cms.Web.Website" Version="10.0.0" />
-		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.0.0" />
-	</ItemGroup>
+  <Import Project="Custom.targets" Condition="Exists('Custom.targets')" />
 
+	<!-- Include Package Items -->
 	<ItemGroup>
 		<None Include="..\LICENSE.md" Pack="true" PackagePath="" />
 		<None Include="..\docs\README.md" Pack="true" PackagePath="" />
 		<None Include="..\assets\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
+
+	<!-- Package References -->
+  <ItemGroup>
+    <PackageReference Include="Umbraco.Cms.Web.Website" Version="10.0.0" />
+    <PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.0.0" />
+  </ItemGroup>
 
 </Project>
