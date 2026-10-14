@@ -1,9 +1,11 @@
 using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.Routing;
+using Umbraco.Cms.Core.Services.Navigation;
 using Umbraco.Cms.Core.Web;
 using Umbraco.Extensions;
 using Our.Umbraco.Skipper.Extensions;
@@ -19,15 +21,19 @@ namespace Our.Umbraco.Skipper
         private readonly IUmbracoContextAccessor _umbracoContextAccessor;
 
         private readonly ISkipperConfiguration _skipperConfiguration;
-        
+
+        private readonly IDocumentNavigationQueryService _navigationQueryService;
+
         public SkipperContentFinder(
             IAppPolicyCache runtimeCache,
             IUmbracoContextAccessor umbracoContextAccessor,
-            ISkipperConfiguration skipperConfiguration)
+            ISkipperConfiguration skipperConfiguration,
+            IDocumentNavigationQueryService navigationQueryService)
         {
             _runtimeCache = runtimeCache;
             _umbracoContextAccessor = umbracoContextAccessor;
             _skipperConfiguration = skipperConfiguration;
+            _navigationQueryService = navigationQueryService;
         }
         public Task<bool> TryFindContent(IPublishedRequestBuilder request)
         {
@@ -50,8 +56,11 @@ namespace Our.Umbraco.Skipper
             }
 
             string culture = request.Culture ?? null;
-            var rootNodes = umbracoContext.Content.GetAtRoot(culture: culture);
-            
+            _navigationQueryService.TryGetRootKeys(out IEnumerable<Guid> rootKeys);
+            IEnumerable<IPublishedContent> rootNodes = rootKeys
+                    .Select(key => umbracoContext.Content.GetById(key))
+                    .Where(x => x != null);
+
             // We have to check both paths, with and without ending slash
             IPublishedContent item = null;
             item = rootNodes

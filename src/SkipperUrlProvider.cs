@@ -10,11 +10,13 @@ using Umbraco.Extensions;
 using Our.Umbraco.Skipper.Configuration;
 using Our.Umbraco.Skipper.Extensions;
 using System.Globalization;
+using Umbraco.Cms.Core.PublishedCache;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Core.Services.Navigation;
 
 namespace Our.Umbraco.Skipper
 {
-    public class SkipperUrlProvider : DefaultUrlProvider
+    public class SkipperUrlProvider : NewDefaultUrlProvider
     {
         private readonly IUmbracoContextAccessor _umbracoContextAccessor;
 
@@ -29,12 +31,18 @@ namespace Our.Umbraco.Skipper
       ISkipperConfiguration skipperConfiguration,
 
       IOptionsMonitor<RequestHandlerSettings> requestSettings,
-            ILogger<DefaultUrlProvider> logger,
+            ILogger<NewDefaultUrlProvider> logger,
             ISiteDomainMapper siteDomainMapper,
             IUmbracoContextAccessor umbracoContextAccessor,
             UriUtility uriUtility,
-      ILocalizationService localizationService)
-      : base(requestSettings, logger, siteDomainMapper, umbracoContextAccessor, uriUtility, localizationService)
+      IPublishedContentCache publishedContentCache,
+      IDomainCache domainCache,
+      IIdKeyMap idKeyMap,
+      IDocumentUrlService documentUrlService,
+      IDocumentNavigationQueryService navigationQueryService,
+      IPublishedContentStatusFilteringService publishedContentStatusFilteringService,
+      ILanguageService languageService)
+      : base(requestSettings, logger, siteDomainMapper, umbracoContextAccessor, uriUtility, publishedContentCache, domainCache, idKeyMap, documentUrlService, navigationQueryService, publishedContentStatusFilteringService, languageService)
         {
             _requestSettings = requestSettings.CurrentValue;
             _globalSettings = globalSettings.Value;
@@ -64,9 +72,9 @@ namespace Our.Umbraco.Skipper
                 if (content.SkipperIs404OrContent(_skipperConfiguration, culture))
                 {
                     // I can return an empty UrlInfo
-                    // And since i cannot simply return new UrlInfo(string.Empty, false, culture);
+                    // And since i cannot simply return a message-only UrlInfo with an empty message,
                     // I have to use a placeholder
-                    return new UrlInfo(Constants.DefaultValues.HiddenSegment, false, culture);
+                    return new UrlInfo(Constants.DefaultValues.HiddenSegment, Alias, culture);
                 }
 
                 // As there might be a multi-level Skipper work, we need to check it here.
@@ -102,7 +110,7 @@ namespace Our.Umbraco.Skipper
 
             // Starting from the base Url generated from DefaultUrlProvider
             UrlInfo url = base.GetUrl(content, mode, culture, current);
-            if (url is null)
+            if (url?.Url is null)
             {
                 //throw new ArgumentNullException($"Base GetUrl for Id {content.Id}.");
                 // if i cannot get defult url i cannot generate one
@@ -110,17 +118,18 @@ namespace Our.Umbraco.Skipper
             }
 
             // Parsing the host
+            string urlText = url.Url.OriginalString;
             string result = string.Empty;
             string host = string.Empty;
-            if (url.Text.StartsWith("http"))
+            if (urlText.StartsWith("http"))
             {
-                Uri u = new Uri(url.Text);
-                result = url.Text.Replace(u.GetLeftPart(UriPartial.Authority), "");
+                Uri u = new Uri(urlText);
+                result = urlText.Replace(u.GetLeftPart(UriPartial.Authority), "");
                 host = u.GetLeftPart(UriPartial.Authority);
             }
             else
             {
-                result = url.Text;
+                result = urlText;
             }
 
             // Handling start/end slashes and HiddenSegment slashes
@@ -182,7 +191,7 @@ namespace Our.Umbraco.Skipper
 
             finalUrl = string.Concat(host, finalUrl);
 
-            return new UrlInfo(finalUrl, true, culture);
+            return new UrlInfo(new Uri(finalUrl, UriKind.RelativeOrAbsolute), Alias, culture, null, false);
         }
     }
 }
