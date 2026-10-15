@@ -180,9 +180,9 @@ namespace Our.Umbraco.Skipper.Notifications
             // Some best practice to avoid infinite loops
             int count = 0;
             // If baseNode is skipper's work, we need to find the first eligible node to be our rootNode
-            while (baseNode != null && baseNode.Parent != null && baseNode.Parent.Id != 0 && baseNode.SkipperWasHere(_skipperConfiguration, culture))
+            while (baseNode != null && baseNode.Parent() != null && baseNode.Parent().Id != 0 && baseNode.SkipperWasHere(_skipperConfiguration, culture))
             {
-                baseNode = baseNode.Parent;
+                baseNode = baseNode.Parent();
                 if (baseNode.SkipperWasHere(_skipperConfiguration, culture)) anyInPathIsSkipperWork = true;
 
                 count++;

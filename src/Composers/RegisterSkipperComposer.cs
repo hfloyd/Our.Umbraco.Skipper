@@ -20,10 +20,10 @@ namespace Our.Umbraco.Skipper.Composers
             builder.UrlSegmentProviders().InsertBefore<DefaultUrlSegmentProvider, SkipperUrlSegmentProvider>();
 
             // Insert SkipperUrlProvider before the default one
-            builder.UrlProviders().InsertBefore<NewDefaultUrlProvider, SkipperUrlProvider>();
+            builder.UrlProviders().InsertBefore<DefaultUrlProvider, SkipperUrlProvider>();
 
             // Insert SkipperContentFinder before the default one
-            builder.ContentFinders().InsertBefore<ContentFinderByUrlNew, SkipperContentFinder>();
+            builder.ContentFinders().InsertBefore<ContentFinderByUrl, SkipperContentFinder>();
 
             // Add notification handlers
             builder.AddNotificationHandler<ContentPublishedNotification, SkipperContentPublishedNotification>();

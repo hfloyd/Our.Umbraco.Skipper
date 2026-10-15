@@ -16,7 +16,7 @@ using Umbraco.Cms.Core.Services.Navigation;
 
 namespace Our.Umbraco.Skipper
 {
-    public class SkipperUrlProvider : NewDefaultUrlProvider
+    public class SkipperUrlProvider : DefaultUrlProvider
     {
         private readonly IUmbracoContextAccessor _umbracoContextAccessor;
 
@@ -31,7 +31,7 @@ namespace Our.Umbraco.Skipper
       ISkipperConfiguration skipperConfiguration,
 
       IOptionsMonitor<RequestHandlerSettings> requestSettings,
-            ILogger<NewDefaultUrlProvider> logger,
+            ILogger<DefaultUrlProvider> logger,
             ISiteDomainMapper siteDomainMapper,
             IUmbracoContextAccessor umbracoContextAccessor,
             UriUtility uriUtility,
@@ -79,7 +79,7 @@ namespace Our.Umbraco.Skipper
 
                 // As there might be a multi-level Skipper work, we need to check it here.
                 // If there are no other nodes in the path that Skipper worked into
-                if (!content.Parent.SkipperWasHere(_skipperConfiguration, culture, recursive: true))
+                if (!content.Parent().SkipperWasHere(_skipperConfiguration, culture, recursive: true))
                 {
                     // I can return null as it should return normal URL.
                     return null;

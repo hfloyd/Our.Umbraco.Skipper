@@ -52,9 +52,9 @@ namespace Our.Umbraco.Skipper.Extensions
             // Some best practice to avoid infinite loops
             int count = 0;
             // Goes back to parents until it finds another Skipper's work
-            while (content.Parent != null && content.Parent.Id != 0)
+            while (content.Parent() != null && content.Parent().Id != 0)
             {
-                content = content.Parent;
+                content = content.Parent();
                 if (content.SkipperWasHere(_skipperConfiguration, culture))
                 {
                     _content = content;
